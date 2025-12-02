@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { PromptItem } from '@/lib/types';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
+import { usePrompts } from '@/context/PromptContext';
 
 interface PromptCardProps {
   data: PromptItem;
@@ -16,12 +17,20 @@ interface PromptCardProps {
 export default function PromptCard({ data, isManageMode, isSelected, onToggleSelect, onEdit }: PromptCardProps) {
   const { showToast } = useToast();
   const { canEdit: checkCanEdit } = useAuth();
+  const { updatePrompt } = usePrompts();
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
     navigator.clipboard.writeText(data.prompt);
     showToast('已复制到剪贴板！');
+  };
+
+  const handleFavoriteToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updatePrompt(data.id, { isFavorite: !data.isFavorite });
+    showToast(data.isFavorite ? '已取消收藏' : '已收藏！', 'success');
   };
 
   const handleSelect = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -161,7 +170,17 @@ export default function PromptCard({ data, isManageMode, isSelected, onToggleSel
                     <i className="fa-solid fa-pen-to-square"></i>
                 </button>
             )}
-
+            <button 
+                onClick={handleFavoriteToggle}
+                className={`transition ${
+                    data.isFavorite 
+                        ? 'text-red-500 hover:text-red-400' 
+                        : 'text-zinc-500 hover:text-red-400'
+                }`}
+                title="收藏"
+            >
+                <i className={data.isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
+            </button>
             <button 
                 onClick={handleCopy}
                 className="text-zinc-500 hover:text-purple-400 transition"
