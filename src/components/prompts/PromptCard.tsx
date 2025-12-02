@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { PromptItem } from '@/lib/types';
 import { useToast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
-import { usePrompts } from '@/context/PromptContext';
+import { useFavorites } from '@/context/FavoritesContext';
 
 interface PromptCardProps {
   data: PromptItem;
@@ -16,8 +16,8 @@ interface PromptCardProps {
 
 export default function PromptCard({ data, isManageMode, isSelected, onToggleSelect, onEdit }: PromptCardProps) {
   const { showToast } = useToast();
-  const { canEdit: checkCanEdit } = useAuth();
-  const { updatePrompt } = usePrompts();
+  const { canEdit: checkCanEdit, isLoggedIn } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const handleCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -29,8 +29,14 @@ export default function PromptCard({ data, isManageMode, isSelected, onToggleSel
   const handleFavoriteToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    updatePrompt(data.id, { isFavorite: !data.isFavorite });
-    showToast(data.isFavorite ? '已取消收藏' : '已收藏！', 'success');
+    
+    if (!isLoggedIn) {
+      showToast('请先登录后再收藏提示词', 'error');
+      return;
+    }
+    
+    toggleFavorite(data.id);
+    showToast(isFavorite(data.id) ? '已取消收藏' : '已收藏！', 'success');
   };
 
   const handleSelect = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -173,13 +179,13 @@ export default function PromptCard({ data, isManageMode, isSelected, onToggleSel
             <button 
                 onClick={handleFavoriteToggle}
                 className={`transition ${
-                    data.isFavorite 
+                    isFavorite(data.id) 
                         ? 'text-red-500 hover:text-red-400' 
                         : 'text-zinc-500 hover:text-red-400'
                 }`}
-                title="收藏"
+                title={isLoggedIn ? '收藏' : '请先登录'}
             >
-                <i className={data.isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
+                <i className={isFavorite(data.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
             </button>
             <button 
                 onClick={handleCopy}
