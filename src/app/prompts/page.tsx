@@ -6,6 +6,7 @@ import { usePrompts } from '@/context/PromptContext';
 import { useSiteConfig } from '@/context/SiteConfigContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useFavorites } from '@/context/FavoritesContext';
 import { usePromptFilters, SortOption } from '@/hooks/usePromptFilters';
 import { usePromptActions } from '@/hooks/usePromptActions';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -24,6 +25,7 @@ function PromptsPageContent() {
   const { config } = useSiteConfig();
   const { canManage, canCreate, isLoggedIn } = useAuth();
   const { showToast } = useToast();
+  const { favorites } = useFavorites();
   const searchParams = useSearchParams();
   const router = useRouter();
   
